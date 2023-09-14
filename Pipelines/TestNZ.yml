@@ -1,0 +1,73 @@
+resources:
+  repositories:
+    - repository: Templates
+      type: git
+      name: AutomatizaceTestu
+
+name: TestPocinEtapa__$(TeamProject)_$(Build.DefinitionName)_$(SourceBranchName)_$(Year:yy).$(Month).$(DayOfMonth)
+
+schedules:
+- cron: '0 8 * * *'
+  displayName: Spusteni testu v 8 rano
+  branches:
+    include:
+    - main
+  always: true
+
+trigger: none
+#- main
+
+stages: 
+  - stage: Check_VPN_Status
+    jobs:
+    - job: cheackVpnStatus
+      pool:
+        name: "GDBuildSrv"
+      steps:
+        - checkout: none
+          fetchDepth: 1
+        - template: CheckVpnStatus.yml
+
+  - stage: TestZalozeniVytvoreniPocinu
+    dependsOn: Check_VPN_Status
+    jobs:
+    - job: TestZalozeniVytvoreniPocinu
+      pool:
+        name: "GDBuildSrv"
+      steps:
+        - checkout: self
+          fetchDepth: 1
+        - template: RunSingleTest.yml
+          parameters:
+            TestFile: 'Tests/TestZalozeniAVytvoreniPocinu.robot'
+            TestName: 'TestZalozeniAVytvoreniPocinu'
+
+  - stage: TestEtapa
+    dependsOn: TestZalozeniVytvoreniPocinu
+    jobs:
+    - job: TestEtapa
+      pool:
+        name: "GDBuildSrv"
+      steps:
+        - checkout: self
+          fetchDepth: 1
+        - template: RunSingleTest.yml
+          parameters:
+            TestFile: 'Tests/TestEtapa.robot'
+            TestName: 'TestEtapa'
+
+  - stage: TestNavrhZmeny
+    dependsOn: TestEtapa
+    jobs:
+    - job: TestNavrhZmeny
+    
+      pool:
+        name: "GDBuildSrv"
+      steps:
+        - checkout: self
+          fetchDepth: 1
+        - template: RunSingleTest.yml
+          parameters:
+            TestFile: 'Tests/TestNavrhZmeny.robot'
+            TestName: 'TestNavrhZmeny'
+

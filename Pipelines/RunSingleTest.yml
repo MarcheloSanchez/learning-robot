@@ -1,0 +1,50 @@
+
+parameters:
+  - name: TestFile
+    type: string
+  - name: TestName
+    type: string
+
+steps:
+- task: Bash@3
+  name: 'runTest'
+  continueOnError: true
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo ${{ parameters.TestFile }}
+      echo ${{ parameters.TestName }}
+      robot --outputdir ${{ parameters.TestName }} --xunit xUnitReport --variable browser:headlesschrome ${{ parameters.TestFile }}
+
+- task: PublishPipelineArtifact@1
+  continueOnError: true
+  name: PublishOutput
+  inputs:
+    targetPath: '$(Pipeline.Workspace)/s/${{ parameters.TestName }}/output.xml'
+    artifact: '${{ parameters.TestName }}_output'
+    publishLocation: 'pipeline'
+
+- task: PublishPipelineArtifact@1
+  continueOnError: true
+  name: PublishLog
+  inputs:
+    targetPath: '$(Pipeline.Workspace)/s/${{ parameters.TestName }}/log.html'
+    artifact: '${{ parameters.TestName }}_log'
+    publishLocation: 'pipeline'
+
+- task: PublishPipelineArtifact@1
+  continueOnError: true
+  name: PublishReport
+  inputs:
+    targetPath: '$(Pipeline.Workspace)/s/${{ parameters.TestName }}/report.html'
+    artifact: '${{ parameters.TestName }}_report'
+    publishLocation: 'pipeline'
+
+- task: PublishTestResults@2
+  name: PublishTestReportXUnit
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: '**/xUnitReport.xml'
+    searchFolder: '$(Pipeline.Workspace)/s'
+    failTaskOnFailedTests: true
+    testRunTitle: '${{ parameters.TestName }}'

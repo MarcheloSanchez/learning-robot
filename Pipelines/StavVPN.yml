@@ -1,0 +1,29 @@
+resources:
+  repositories:
+    - repository: Templates
+      type: git
+      name: AutomatizaceTestu
+
+name: StavVPN__$(TeamProject)_$(Build.DefinitionName)_$(SourceBranchName)_$(Year:yy).$(Month).$(DayOfMonth)
+
+schedules:
+- cron: '*/5 * * * *'
+  displayName: Stav prostredi kazdych 5min
+  branches:
+    include:
+    - main
+  always: true
+
+trigger: none
+#- main
+
+stages: 
+  - stage: Check_VPN_Status
+    jobs:
+    - job: cheackVpnStatus
+      pool:
+        name: "GDBuildSrv"
+      steps:
+        - checkout: none
+          fetchDepth: 1
+        - template: CheckVpnStatus.yml

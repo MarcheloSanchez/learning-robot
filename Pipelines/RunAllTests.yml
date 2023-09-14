@@ -1,0 +1,79 @@
+resources:
+  repositories:
+    - repository: Templates
+      type: git
+      name: AutomatizaceTestu
+
+name: TEST__$(TeamProject)_$(Build.DefinitionName)_$(SourceBranchName)_$(Year:yy).$(Month).$(DayOfMonth)
+
+trigger: none
+#- main
+
+stages: 
+  - stage: Check_VPN_Status
+    jobs:
+    - job: cheackVpnStatus
+      pool:
+        name: "GDBuildSrv"
+      steps:
+        - checkout: none
+          fetchDepth: 1
+        - template: CheckVpnStatus.yml
+
+  - stage: RunTest_Google
+    dependsOn: Check_VPN_Status
+    jobs:
+    - job: RunGoogleTest
+      pool:
+        name: "GDBuildSrv"
+      #variables:
+        #tag : $[ stageDependencies.Prepare_release.create_tag.outputs['CreateVersionNumber.tag'] ]
+      steps:
+        - checkout: self
+          fetchDepth: 1
+        - template: RunSingleTest.yml
+          parameters:
+            TestFile: 'OpenGoogle.robot'
+            TestName: 'OpenGoogle4'
+
+    - job: RunGoogleTest1
+      pool:
+        name: "GDBuildSrv"
+      #variables:
+        #tag : $[ stageDependencies.Prepare_release.create_tag.outputs['CreateVersionNumber.tag'] ]
+      steps:
+        - checkout: self
+          fetchDepth: 1
+        - template: RunSingleTest.yml
+          parameters:
+            TestFile: 'OpenGoogle.robot'
+            TestName: 'OpenGoogle3'
+
+  - stage: RunTest_Google2
+    dependsOn: Check_VPN_Status
+    jobs:
+    - job: RunGoogleTest3
+      pool:
+        name: "GDBuildSrv"
+      #variables:
+        #tag : $[ stageDependencies.Prepare_release.create_tag.outputs['CreateVersionNumber.tag'] ]
+      steps:
+        - checkout: self
+          fetchDepth: 1
+        - template: RunSingleTest.yml
+          parameters:
+            TestFile: 'OpenGoogle.robot'
+            TestName: 'OpenGoogle2'
+
+    - job: RunGoogleTest5
+      pool:
+        name: "GDBuildSrv"
+      #variables:
+        #tag : $[ stageDependencies.Prepare_release.create_tag.outputs['CreateVersionNumber.tag'] ]
+      steps:
+        - checkout: self
+          fetchDepth: 1
+        - template: RunSingleTest.yml
+          parameters:
+            TestFile: 'OpenGoogle.robot'
+            TestName: 'OpenGoogle1'

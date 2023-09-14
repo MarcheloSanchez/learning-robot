@@ -1,0 +1,18 @@
+
+steps:
+
+- task: Bash@3
+  name: checkVpnStatus
+  inputs:
+    targetType: 'inline'
+    script: |
+      systemctl -q is-active tpi_vpn.service  && 
+      echo "vpn Running" || {
+      echo "Service is not running at all "
+      exit 1
+      }
+      
+
+
+
+
